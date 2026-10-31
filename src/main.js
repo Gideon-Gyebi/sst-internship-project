@@ -5,6 +5,7 @@ import {
   loginWithGoogle,
   logout,
   registerWithEmail,
+  requestPasswordReset,
   watchAuthState,
 } from './services/auth.js';
 import { renderTaskDashboard, renderTaskDialog } from './components/taskViews.js';
@@ -40,6 +41,7 @@ const state = {
   authMode: 'login',
   authBusy: false,
   authError: '',
+  authNotice: '',
   email: '',
   name: '',
   mobileMenuOpen: false,
@@ -80,6 +82,16 @@ function errorMessage(error) {
   return messages[error?.code] || 'We could not complete sign-in. Please try again.';
 }
 
+function passwordResetErrorMessage(error) {
+  const messages = {
+    'auth/invalid-email': 'Enter a valid email address and try again.',
+    'auth/network-request-failed': 'A network error interrupted the reset request. Check your connection and try again.',
+    'auth/too-many-requests': 'Too many reset requests were made. Wait a little and try again.',
+    'auth/operation-not-allowed': 'Email/password sign-in is not enabled in Firebase Authentication.',
+  };
+  return messages[error?.code] || 'We could not send password reset instructions. Please try again.';
+}
+
 function taskErrorMessage(error) {
   const messages = {
     'permission-denied': 'Firestore blocked this request. Deploy the project’s Firestore rules, then reload.',
@@ -110,6 +122,7 @@ function renderAuthScreen() {
   const registering = state.authMode === 'register';
   const title = registering ? 'Create your account' : 'Welcome back';
   const error = state.authError ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.authError)}</div>` : '';
+  const notice = state.authNotice ? `<div class="auth-message auth-message--success" role="status">${escapeHtml(state.authNotice)}</div>` : '';
   const setupNotice = firebaseSetupMessage ? `<div class="auth-message auth-message--setup" role="status">${escapeHtml(firebaseSetupMessage)}</div>` : '';
 
   return `
@@ -135,7 +148,7 @@ function renderAuthScreen() {
         <div class="auth-card">
           <h2 id="auth-title">${title}</h2>
           <p class="auth-subtitle">${registering ? 'A fresh start for a more focused semester.' : 'Pick up where you left off. You’ve got this.'}</p>
-          ${setupNotice}${error}
+          ${setupNotice}${error}${notice}
           <button class="google-button" type="button" data-action="google" ${state.authBusy || !firebaseReady ? 'disabled' : ''}>
             <span class="google-mark" aria-hidden="true">G</span><span>${state.authBusy ? 'Connecting…' : 'Continue with Google'}</span>
           </button>
@@ -146,6 +159,7 @@ function renderAuthScreen() {
             <input class="auth-input" id="email" name="email" type="email" autocomplete="email" placeholder="you@university.edu" value="${escapeHtml(state.email)}" required ${state.authBusy ? 'disabled' : ''} />
             <label class="field-label" for="password">Password</label>
             <div class="password-field"><input class="auth-input" id="password" name="password" type="password" autocomplete="${registering ? 'new-password' : 'current-password'}" placeholder="${registering ? 'Create a password' : 'Enter your password'}" minlength="8" required ${state.authBusy ? 'disabled' : ''} /><button class="password-toggle" type="button" data-action="toggle-password" aria-label="Show password" aria-pressed="false">${icon('eye', 17)}</button></div>
+            ${!registering ? `<button class="auth-forgot-password" type="button" data-action="reset-password" ${state.authBusy || !firebaseReady ? 'disabled' : ''}>Forgot password?</button>` : ''}
             ${registering ? '<p class="password-hint">Use at least 8 characters.</p>' : ''}
             <button class="button button--primary auth-submit" type="submit" ${state.authBusy || !firebaseReady ? 'disabled' : ''}>${state.authBusy ? 'Please wait…' : registering ? 'Create account' : 'Sign in'}</button>
           </form>
@@ -224,6 +238,7 @@ function bindAuthControls() {
     }
 
     state.authError = '';
+    state.authNotice = '';
     state.authBusy = true;
     setAuthFormBusy(true);
     try {
@@ -244,6 +259,7 @@ function bindAuthControls() {
 
   document.querySelector('[data-action="google"]')?.addEventListener('click', async () => {
     state.authError = '';
+    state.authNotice = '';
     state.authBusy = true;
     setAuthFormBusy(true);
     try {
@@ -255,9 +271,43 @@ function bindAuthControls() {
     }
   });
 
+  document.querySelector('[data-action="reset-password"]')?.addEventListener('click', async () => {
+    const emailInput = document.querySelector('#email');
+    const email = String(emailInput?.value || '').trim();
+    state.email = email;
+    state.authError = '';
+    state.authNotice = '';
+
+    if (!email || !emailInput.checkValidity()) {
+      state.authError = 'Enter a valid email address to receive password reset instructions.';
+      render();
+      document.querySelector('#email')?.focus();
+      return;
+    }
+
+    state.authBusy = true;
+    setAuthFormBusy(true);
+    document.querySelector('[data-action="reset-password"]')?.replaceChildren('Sending instructions…');
+    try {
+      await requestPasswordReset(email);
+      state.authNotice = 'If an account uses that email, password reset instructions will be sent. Check your inbox and spam folder.';
+    } catch (error) {
+      if (error?.code === 'auth/user-not-found') {
+        state.authNotice = 'If an account uses that email, password reset instructions will be sent. Check your inbox and spam folder.';
+      } else {
+        state.authError = passwordResetErrorMessage(error);
+      }
+    } finally {
+      state.authBusy = false;
+      render();
+      document.querySelector('#email')?.focus();
+    }
+  });
+
   document.querySelector('[data-action="switch-mode"]')?.addEventListener('click', () => {
     state.authMode = state.authMode === 'login' ? 'register' : 'login';
     state.authError = '';
+    state.authNotice = '';
     render();
     document.querySelector(state.authMode === 'register' ? '#full-name' : '#email')?.focus();
   });

@@ -15,7 +15,7 @@ The required values are `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `V
 
 ## Current implementation
 
-The app includes Firebase email/password registration and login, Google sign-in, restored authentication state, and sign-out. Signed-in users can create, view, edit, complete or reopen, and delete their own study tasks in Firestore. The responsive dashboard includes task counts, status filters, pagination with up to 10 tasks per page, helpful empty states, loading/retry/error feedback, and Coastal Blue light and dark themes. Firestore rules validate task fields and restrict access to the signed-in user's `users/{userId}/tasks` path.
+The app includes Firebase email/password registration and login, Google sign-in, password reset email requests, restored authentication state, and sign-out. Signed-in users can create, view, edit, complete or reopen, and delete their own study tasks in Firestore. The responsive dashboard includes task counts, status filters, pagination with up to 10 tasks per page, helpful empty states, loading/retry/error feedback, and Coastal Blue light and dark themes. Firestore rules validate task fields and restrict access to the signed-in user's `users/{userId}/tasks` path.
 
 Run `npm run test:rules` to execute the Firestore security tests against the local emulator. This uses a demo project ID and does not connect to production. The emulator requires Java 11 or newer and the Firebase CLI. Use `npm run build` to create the Firebase Hosting files in `dist/`.
 

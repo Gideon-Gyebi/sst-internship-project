@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase.js';
@@ -34,6 +35,10 @@ export async function registerWithEmail({ name, email, password }) {
 export async function loginWithEmail({ email, password }) {
   const credential = await signInWithEmailAndPassword(requireAuth(), email, password);
   return credential.user;
+}
+
+export async function requestPasswordReset(email) {
+  await sendPasswordResetEmail(requireAuth(), email.trim());
 }
 
 export async function loginWithGoogle() {

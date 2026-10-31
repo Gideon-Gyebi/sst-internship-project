@@ -12,6 +12,7 @@ This file records validation evidence for the Student Study Tracker. Add new res
 | Whitespace check | Pass | `git diff --check` completed without errors. |
 | Local pagination preview | Pass | The signed-in local dashboard showed 10 of 11 tasks on page 1 and the remaining task on page 2. Moving pages restored focus to a pagination control. No Firestore data was changed during this check. |
 | Firebase Hosting deployment | Pass | Firestore rules and the production build were released to `sstv1-e6dc0`; the live sign-in page loads at `https://sstv1-e6dc0.web.app`. Authenticated CRUD was not rerun against the live site after deployment. |
+| Password reset flow | Implemented; delivery not triggered | The UI validates email input and calls Firebase Authentication. A reset email was not requested during implementation to avoid sending mail from the project account. Test with an email address you control. |
 
 ## Owner verification follow-up
 
