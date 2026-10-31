@@ -12,9 +12,11 @@ service cloud.firestore {
         && data.title is string
         && data.title.size() > 0
         && data.title.size() <= 160
+        && data.title.matches('.*\\S.*')
         && data.subject is string
         && data.subject.size() > 0
         && data.subject.size() <= 120
+        && data.subject.matches('.*\\S.*')
         && data.status in ['pending', 'completed']
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
