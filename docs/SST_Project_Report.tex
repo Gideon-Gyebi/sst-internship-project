@@ -1,0 +1,126 @@
+% SST Project Report - Section 6 deliverable draft for Overleaf.
+% Replace bracketed placeholders and the screenshot frame before submission.
+% Suggested compiler: pdfLaTeX. Target length: approximately 2-4 pages.
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  pdftitle={Student Study Tracker Project Report},
+  pdfauthor={[Student Name]}
+}
+\setlist{nosep,leftmargin=*}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\titleformat{\section}{\large\bfseries\color{blue!55!black}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+
+\newcommand{\placeholder}[1]{\textcolor{gray}{\textit{[#1]}}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Section 6: Student Study Tracker Project Deliverable}\\[5pt]
+  {\large Student Study Tracker (SST)}\\[9pt]
+  \begin{tabular}{rl}
+    Student: & \placeholder{Student name} \\
+    Programme / course: & \placeholder{Programme and course} \\
+    Institution: & Accra Technical University \\
+    Submission date: & \placeholder{Final submission date}
+  \end{tabular}
+\end{center}
+
+\section{Project Overview}
+
+The Student Study Tracker (SST) is a web application for organising study tasks by title and subject or course. It addresses a common student problem: coursework and study actions can be spread across notes and reminders, making it difficult to see what remains to be done or which tasks have been completed. SST brings these actions into one authenticated workspace and keeps each student's tasks in cloud storage.
+
+The project was developed for the ATU Virtual Internship beginner software development project. Its scope is intentionally focused on task tracking: students can record a task, associate it with a course, update its status, and review progress from a dashboard.
+
+\section{Implemented Features}
+
+SST uses Vite, HTML, CSS, and modular vanilla JavaScript for its client interface. Firebase Authentication supports email and password accounts and Google sign-in. Cloud Firestore stores task data under a user-specific path. Firebase Hosting serves the deployed web application.
+
+The current application supports the following:
+\begin{itemize}
+  \item Account registration, sign-in, restored authentication state, and sign-out.
+  \item Task creation and display with a required title and subject/course.
+  \item Editing, deletion, completion, and reopening of a task.
+  \item Dashboard counts for total, pending, and completed tasks.
+  \item All, Pending, and Completed status views, with a maximum of ten tasks shown per page.
+  \item Loading, retry, error, and empty-state feedback.
+  \item Responsive layouts and a saved manual light/dark theme preference.
+\end{itemize}
+
+Each task contains a title, subject, status, creation timestamp, and update timestamp. Firestore Security Rules restrict task access to the authenticated owner and validate allowed fields, value types, status values, size limits, and server timestamps. Whitespace-only titles and course names are rejected by the rules.
+
+\section{Deployment and Evidence}
+
+The application is deployed to Firebase Hosting at \url{https://sstv1-e6dc0.web.app}. The Firestore rules and Hosting build were released to the Firebase project for SST on 31 October 2026. The deployed sign-in page was opened successfully after release.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\begin{minipage}[c][4.2cm][c]{0.88\linewidth}
+    \centering
+    \textbf{Screenshot placeholder}\\[5pt]
+    Replace this box with a screenshot of the SST dashboard.\\
+    Suggested evidence: dashboard with task counts and the task list.
+  \end{minipage}}
+  \caption{Student Study Tracker dashboard. Replace the placeholder with a final application screenshot.}
+  \label{fig:sst-dashboard}
+\end{figure}
+
+\section{Testing Summary}
+
+The Firestore rules were tested with the Firebase Emulator Suite and an isolated demo project ID. Seven automated tests passed. They cover unauthenticated access denial, owner access, cross-user read and write denial, valid task operations, whitespace-only values, field limits, invalid or extra fields, and protection of the original creation timestamp. These tests do not write to the production database.
+
+The production build completed successfully, the dependency audit reported zero known vulnerabilities, and the pagination behaviour was checked in the local browser with more than ten tasks. The first page displayed ten tasks and the next page displayed the remaining task. Earlier owner testing confirmed that task creation, editing, and deletion update Firestore in real time. The live site was verified to load its sign-in page after deployment; authenticated task operations have not yet been retested against the live deployment.
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.43\linewidth} X}
+\hline
+\textbf{Test} & \textbf{Recorded result} \\
+\hline
+Firestore access and validation rules & Pass: 7 emulator tests \\
+Production build & Pass: Vite generated the Hosting build \\
+Dependency audit & Pass: zero reported vulnerabilities \\
+Pagination & Pass: ten-item page limit observed locally \\
+Live deployment & Pass: deployed sign-in page loaded \\
+Responsive and theme review & \placeholder{Owner to confirm final device/theme checks} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\section{Development Challenge and Resolution}
+
+A key challenge was protecting personal task data while keeping the interface responsive to Firestore updates. Client-side checks alone could be bypassed by a modified client, so the project enforces ownership and task validation in Firestore Security Rules as well. Emulator tests now exercise both allowed and denied requests without touching live data. During dashboard testing, pagination was also checked for keyboard focus retention after each page change.
+
+\section{Future Improvement}
+
+A future improvement is a combined search and course filter. Students could search task titles or descriptions and narrow results to a selected course. This feature is outside the current implementation scope; pagination keeps long task lists manageable in the delivered version.
+
+\section*{Items to Complete Before Submission}
+
+\begin{itemize}
+  \item Replace the student, programme/course, and final submission date placeholders.
+  \item Insert a clear screenshot of the final dashboard and replace the screenshot frame.
+  \item Confirm the responsive and light/dark theme test row after owner review.
+  \item Recheck authenticated task operations on the deployed site if required by the instructor.
+  \item Add any required AI-assistance disclosure and source citations under ATU guidance.
+  \item Confirm whether the instructor requires any additional report headings or citation style.
+\end{itemize}
+
+\end{document}
