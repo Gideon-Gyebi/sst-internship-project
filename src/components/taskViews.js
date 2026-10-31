@@ -1,25 +1,38 @@
-export function renderTaskDashboard({ tasks, filter, loading, busy, icon, escapeHtml }) {
+export function renderTaskDashboard({ tasks, filter, loading, loadError, error, busy, busyMessage, icon, escapeHtml }) {
   const completed = tasks.filter((task) => task.status === 'completed').length;
   const pending = tasks.length - completed;
   const visibleTasks = tasks.filter((task) => filter === 'all' || task.status === filter);
+  const countsUnknown = loading || loadError;
+  const totalValue = countsUnknown ? '—' : tasks.length;
+  const pendingValue = countsUnknown ? '—' : pending;
+  const completedValue = countsUnknown ? '—' : completed;
+  const progressText = loading ? 'Loading your tasks…' : loadError ? 'Tasks unavailable' : tasks.length ? `${completed} of ${tasks.length} tasks completed` : 'Ready for a fresh start';
+  const taskContent = loading
+    ? '<div class="tasks-loading" role="status">Loading your study tasks…</div>'
+    : loadError
+      ? `<div class="task-load-error" role="alert"><span class="task-load-error__icon">!</span><h3>Your tasks couldn’t be loaded</h3><p>${escapeHtml(error || 'Check your connection and Firestore access, then try again.')}</p><button class="button button--secondary" type="button" data-action="retry-tasks">Try again</button></div>`
+      : visibleTasks.length
+        ? visibleTasks.map((task) => taskRow(task, busy, icon, escapeHtml)).join('')
+        : emptyState(filter, tasks.length > 0, icon);
 
   return `
     <section class="stats-grid" aria-label="Task summary">
-      ${statCard('Total tasks', tasks.length, 'list', 'stat-card--neutral', icon)}
-      ${statCard('Pending', pending, 'clock', 'stat-card--pending', icon)}
-      ${statCard('Completed', completed, 'check', 'stat-card--complete', icon)}
+      ${statCard('Total tasks', totalValue, 'list', 'stat-card--neutral', icon)}
+      ${statCard('Pending', pendingValue, 'clock', 'stat-card--pending', icon)}
+      ${statCard('Completed', completedValue, 'check', 'stat-card--complete', icon)}
     </section>
-    <section class="task-panel" aria-labelledby="tasks-heading">
-      <div class="panel-heading"><h2 id="tasks-heading">Your study tasks</h2><span class="progress-copy">${tasks.length ? `${completed} of ${tasks.length} tasks completed` : 'Ready for a fresh start'}</span></div>
+    <section class="task-panel" aria-labelledby="tasks-heading" aria-busy="${loading || busy}">
+      <div class="panel-heading"><h2 id="tasks-heading">Your study tasks</h2><span class="progress-copy" aria-live="polite">${progressText}</span></div>
       <div class="tabs" role="tablist" aria-label="Filter tasks">
-        ${tabButton('all', 'All', tasks.length, filter)}
-        ${tabButton('pending', 'Pending', pending, filter)}
-        ${tabButton('completed', 'Completed', completed, filter)}
+        ${tabButton('all', 'All', countsUnknown ? '—' : tasks.length, filter)}
+        ${tabButton('pending', 'Pending', countsUnknown ? '—' : pending, filter)}
+        ${tabButton('completed', 'Completed', countsUnknown ? '—' : completed, filter)}
       </div>
       <div class="task-table" role="table" aria-label="Study tasks">
-        ${loading ? '<div class="tasks-loading" role="status">Loading your study tasks…</div>' : visibleTasks.length ? visibleTasks.map((task) => taskRow(task, busy, icon, escapeHtml)).join('') : emptyState(filter, tasks.length > 0, icon)}
+        ${taskContent}
       </div>
-      <div class="panel-footer"><span>${loading ? 'Loading tasks' : `Showing ${visibleTasks.length} of ${tasks.length} tasks`}</span><span class="footer-hint">${icon('check', 13)} Use the checkbox to change task status</span></div>
+      ${busyMessage ? `<p class="task-feedback" role="status">${escapeHtml(busyMessage)}</p>` : ''}
+      <div class="panel-footer"><span>${loading ? 'Loading tasks' : loadError ? 'Task counts unavailable' : `Showing ${visibleTasks.length} of ${tasks.length} tasks`}</span>${loadError ? '' : `<span class="footer-hint">${icon('check', 13)} Use the checkbox to change task status</span>`}</div>
     </section>`;
 }
 

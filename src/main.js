@@ -49,6 +49,8 @@ const state = {
   taskError: '',
   taskFilter: 'all',
   taskBusy: false,
+  taskBusyMessage: '',
+  tasksLoadFailed: false,
   taskDialog: null,
   stopWatchingTasks: null,
 };
@@ -157,7 +159,13 @@ function renderDashboard(user) {
   const displayName = user.displayName?.trim() || user.email?.split('@')[0] || 'there';
   const safeName = escapeHtml(displayName);
   const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'S';
-  const dashboardSubtitle = state.tasks.length ? 'Your coursework, in one calm place. Keep your momentum going.' : 'Your semester, organized. Let’s start with your first study task.';
+  const dashboardSubtitle = state.tasksLoading
+    ? 'Loading your saved study tasks…'
+    : state.tasksLoadFailed
+      ? 'Your saved study tasks are temporarily unavailable.'
+      : state.tasks.length
+        ? 'Your coursework, in one calm place. Keep your momentum going.'
+        : 'Your semester, organized. Let’s start with your first study task.';
   return `
     <div class="app-shell">
       <aside class="sidebar ${state.mobileMenuOpen ? 'sidebar--open' : ''}" aria-label="Main navigation">
@@ -172,9 +180,9 @@ function renderDashboard(user) {
         <main class="main-content" id="dashboard">
           <div class="mobile-brand-row"><a class="brand" href="#dashboard"><span class="brand-mark">${icon('book', 19)}</span><span class="brand-copy"><strong>SST</strong></span></a>${themeToggle('mobile-theme')}</div>
           ${state.authError ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.authError)}</div>` : ''}
-          ${state.taskError && !state.taskDialog ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.taskError)}</div>` : ''}
-          <section class="welcome-row"><div><h1>Welcome to your workspace, ${safeName}</h1><p>${dashboardSubtitle}</p></div><button class="button button--primary" type="button" data-action="add-task" ${state.taskBusy ? 'disabled' : ''}>${icon('plus', 16)} Add task</button></section>
-          ${renderTaskDashboard({ tasks: state.tasks, filter: state.taskFilter, loading: state.tasksLoading, busy: state.taskBusy, icon, escapeHtml })}
+          ${state.taskError && !state.taskDialog && !state.tasksLoadFailed ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.taskError)}</div>` : ''}
+          <section class="welcome-row"><div><h1>Welcome to your workspace, ${safeName}</h1><p>${dashboardSubtitle}</p></div><button class="button button--primary" type="button" data-action="add-task" ${state.taskBusy || state.tasksLoadFailed ? 'disabled' : ''}>${icon('plus', 16)} Add task</button></section>
+          ${renderTaskDashboard({ tasks: state.tasks, filter: state.taskFilter, loading: state.tasksLoading, loadError: state.tasksLoadFailed, error: state.taskError, busy: state.taskBusy, busyMessage: state.taskBusyMessage, icon, escapeHtml })}
           <p class="page-note">Small steps add up. Focus on one task at a time.</p>
         </main>
       </div>
@@ -308,6 +316,7 @@ function bindDashboardControls() {
     const task = state.tasks.find((item) => item.id === button.dataset.taskId);
     if (!task) return;
     state.taskBusy = true;
+    state.taskBusyMessage = 'Updating task status…';
     state.taskError = '';
     render();
     try {
@@ -317,6 +326,7 @@ function bindDashboardControls() {
       state.taskError = taskErrorMessage(error);
     } finally {
       state.taskBusy = false;
+      state.taskBusyMessage = '';
       render();
     }
   }));
@@ -334,6 +344,11 @@ function bindDashboardControls() {
     if (event.target === event.currentTarget) closeTaskDialog();
   });
   document.querySelector('[data-action="confirm-delete"]')?.addEventListener('click', confirmDeleteTask);
+  document.querySelector('[data-action="retry-tasks"]')?.addEventListener('click', () => {
+    if (!state.user || state.tasksLoading) return;
+    watchCurrentUserTasks(state.user);
+    render();
+  });
   document.querySelector('#task-form')?.addEventListener('submit', saveTaskForm);
   document.querySelector('.task-dialog')?.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !state.taskBusy) closeTaskDialog();
@@ -430,6 +445,7 @@ async function watchCurrentUserTasks(user) {
   state.stopWatchingTasks = null;
   state.tasks = [];
   state.tasksLoading = Boolean(user);
+  state.tasksLoadFailed = false;
   state.taskError = '';
   state.taskFilter = 'all';
   state.taskDialog = null;
@@ -444,6 +460,7 @@ async function watchCurrentUserTasks(user) {
       if (state.user?.uid !== userId) return;
       state.tasks = tasks;
       state.tasksLoading = false;
+      state.tasksLoadFailed = false;
       if (state.taskDialog && state.taskDialog.mode !== 'add' && !tasks.some((task) => task.id === state.taskDialog.taskId)) {
         state.taskDialog = null;
         state.taskError = 'That task is no longer available. Your list has been refreshed.';
@@ -452,6 +469,7 @@ async function watchCurrentUserTasks(user) {
     }, (error) => {
       if (state.user?.uid !== userId) return;
       state.tasksLoading = false;
+      state.tasksLoadFailed = true;
       state.taskError = taskErrorMessage(error);
       render();
     });
@@ -463,6 +481,7 @@ async function watchCurrentUserTasks(user) {
   } catch (error) {
     if (state.user?.uid !== userId) return;
     state.tasksLoading = false;
+    state.tasksLoadFailed = true;
     state.taskError = taskErrorMessage(error);
     render();
   }
