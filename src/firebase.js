@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 
 const requiredKeys = [
   'VITE_FIREBASE_API_KEY',
@@ -20,9 +19,10 @@ export const firebaseSetupMessage = firebaseReady
 
 let auth = null;
 let db = null;
+let firebaseApp = null;
 
 if (firebaseReady) {
-  const app = initializeApp({
+  firebaseApp = initializeApp({
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -31,8 +31,16 @@ if (firebaseReady) {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
   });
 
-  auth = getAuth(app);
-  db = getFirestore(app);
+  auth = getAuth(firebaseApp);
 }
 
-export { auth, db };
+export async function getDb() {
+  if (!firebaseReady) return null;
+  if (!db) {
+    const { getFirestore } = await import('firebase/firestore');
+    db = getFirestore(firebaseApp);
+  }
+  return db;
+}
+
+export { auth };

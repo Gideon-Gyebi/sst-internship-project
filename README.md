@@ -11,8 +11,8 @@ Vite, vanilla JavaScript, and Firebase foundation for the ATU Virtual Internship
 
 The required values are `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID`. Create a Firebase project and Web app in the Firebase Console to obtain them. Enable Email/Password and Google providers in Authentication when implementing the authentication phase.
 
-## Current foundation
+## Current implementation
 
-The responsive dashboard shell includes Coastal Blue light and dark themes, a persistent theme choice, sample dashboard content, and mobile navigation. Task and account controls are visual placeholders until their implementation phases. Firestore rules scope task access to the signed-in user's `users/{userId}/tasks` path.
+The app includes Firebase email/password registration and login, Google sign-in, restored authentication state, and sign-out. Signed-in users can create, view, edit, complete or reopen, and delete their own study tasks in Firestore. The responsive dashboard includes task counts, status filters, helpful empty states, loading/retry/error feedback, and Coastal Blue light and dark themes. Firestore rules validate task fields and restrict access to the signed-in user's `users/{userId}/tasks` path.
 
-Use `npm run build` to create the Firebase Hosting files in `dist/`. Deploy Firestore rules only after creating the Firebase project and reviewing the target project in the Firebase CLI.
+Use `npm run build` to create the Firebase Hosting files in `dist/`. In the Firebase Console, enable Email/Password and Google sign-in under Authentication. For local Google sign-in, make sure `localhost` is in Authentication's authorized domains. After reviewing `firestore.rules`, deploy it before testing live task operations: `firebase deploy --only firestore:rules --project sstv1-e6dc0`.
