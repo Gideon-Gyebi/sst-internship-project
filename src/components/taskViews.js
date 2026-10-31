@@ -1,7 +1,10 @@
-export function renderTaskDashboard({ tasks, filter, loading, loadError, error, busy, busyMessage, icon, escapeHtml }) {
+export function renderTaskDashboard({ tasks, filter, page, pageSize = 10, loading, loadError, error, busy, busyMessage, icon, escapeHtml }) {
   const completed = tasks.filter((task) => task.status === 'completed').length;
   const pending = tasks.length - completed;
-  const visibleTasks = tasks.filter((task) => filter === 'all' || task.status === filter);
+  const filteredTasks = tasks.filter((task) => filter === 'all' || task.status === filter);
+  const pageCount = Math.ceil(filteredTasks.length / pageSize);
+  const currentPage = Math.min(Math.max(page, 1), Math.max(pageCount, 1));
+  const pageTasks = filteredTasks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const countsUnknown = loading || loadError;
   const totalValue = countsUnknown ? '—' : tasks.length;
   const pendingValue = countsUnknown ? '—' : pending;
@@ -11,8 +14,8 @@ export function renderTaskDashboard({ tasks, filter, loading, loadError, error, 
     ? '<div class="tasks-loading" role="status">Loading your study tasks…</div>'
     : loadError
       ? `<div class="task-load-error" role="alert"><span class="task-load-error__icon">!</span><h3>Your tasks couldn’t be loaded</h3><p>${escapeHtml(error || 'Check your connection and Firestore access, then try again.')}</p><button class="button button--secondary" type="button" data-action="retry-tasks">Try again</button></div>`
-      : visibleTasks.length
-        ? visibleTasks.map((task) => taskRow(task, busy, icon, escapeHtml)).join('')
+      : pageTasks.length
+        ? pageTasks.map((task) => taskRow(task, busy, icon, escapeHtml)).join('')
         : emptyState(filter, tasks.length > 0, icon);
 
   return `
@@ -23,7 +26,7 @@ export function renderTaskDashboard({ tasks, filter, loading, loadError, error, 
     </section>
     <section class="task-panel" aria-labelledby="tasks-heading" aria-busy="${loading || busy}">
       <div class="panel-heading"><h2 id="tasks-heading">Your study tasks</h2><span class="progress-copy" aria-live="polite">${progressText}</span></div>
-      <div class="tabs" role="tablist" aria-label="Filter tasks">
+      <div class="tabs" role="group" aria-label="Filter tasks">
         ${tabButton('all', 'All', countsUnknown ? '—' : tasks.length, filter)}
         ${tabButton('pending', 'Pending', countsUnknown ? '—' : pending, filter)}
         ${tabButton('completed', 'Completed', countsUnknown ? '—' : completed, filter)}
@@ -31,8 +34,9 @@ export function renderTaskDashboard({ tasks, filter, loading, loadError, error, 
       <div class="task-table" role="table" aria-label="Study tasks">
         ${taskContent}
       </div>
+      ${!loading && !loadError && pageCount > 1 ? `<nav class="task-pagination" aria-label="Study task pages"><span>Showing ${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filteredTasks.length)} of ${filteredTasks.length}</span><div><button class="button button--secondary" type="button" data-task-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">Previous</button><span class="task-pagination__current" aria-live="polite">Page ${currentPage} of ${pageCount}</span><button class="button button--secondary" type="button" data-task-page="${currentPage + 1}" ${currentPage === pageCount ? 'disabled' : ''} aria-label="Next page">Next</button></div></nav>` : ''}
       ${busyMessage ? `<p class="task-feedback" role="status">${escapeHtml(busyMessage)}</p>` : ''}
-      <div class="panel-footer"><span>${loading ? 'Loading tasks' : loadError ? 'Task counts unavailable' : `Showing ${visibleTasks.length} of ${tasks.length} tasks`}</span>${loadError ? '' : `<span class="footer-hint">${icon('check', 13)} Use the checkbox to change task status</span>`}</div>
+      <div class="panel-footer"><span>${loading ? 'Loading tasks' : loadError ? 'Task counts unavailable' : `Showing ${pageTasks.length} of ${filteredTasks.length} ${filter === 'all' ? 'tasks' : `${filter} tasks`}`}</span>${loadError ? '' : `<span class="footer-hint">${icon('check', 13)} Use the checkbox to change task status</span>`}</div>
     </section>`;
 }
 
@@ -81,7 +85,7 @@ function statCard(label, value, iconName, modifier, icon) {
 }
 
 function tabButton(key, label, count, activeFilter) {
-  return `<button class="tab ${activeFilter === key ? 'tab--active' : ''}" type="button" role="tab" aria-selected="${activeFilter === key}" data-task-filter="${key}">${label}<span>${count}</span></button>`;
+  return `<button class="tab ${activeFilter === key ? 'tab--active' : ''}" type="button" aria-pressed="${activeFilter === key}" data-task-filter="${key}">${label}<span>${count}</span></button>`;
 }
 
 function taskRow(task, busy, icon, escapeHtml) {

@@ -103,12 +103,16 @@ button:disabled { cursor: not-allowed; opacity: .65; }
 .task-details strong { overflow: hidden; font-size: 13.91px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .task-details small { color: var(--muted); font-size: 12.65px; }
 .task-check { display: grid; width: 17px; height: 17px; flex: none; place-items: center; border: 1px solid var(--muted); border-radius: 5px; color: white; }
-.task-check--checked { border-color: var(--blue); background: var(--blue); }
 .task-row--complete .task-details strong { color: var(--muted); }
 .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 6px; background: var(--soft-surface); color: var(--muted); font-size: 11.38px; white-space: nowrap; }
 .status-pill--complete { background: var(--blue-soft); color: var(--blue); }
 .row-actions { display: flex; gap: 7px; }
 .icon-button { display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--muted); }
+.task-pagination { display: flex; min-height: 54px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 19px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.65px; }
+.task-pagination > div { display: flex; align-items: center; gap: 9px; }
+.task-pagination .button { min-height: 34px; padding: 0 11px; cursor: pointer; font-size: 12.65px; }
+.task-pagination .button:disabled { cursor: not-allowed; opacity: .5; }
+.task-pagination__current { min-width: 78px; text-align: center; }
 .panel-footer { display: flex; min-height: 35px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 19px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.38px; }
 .footer-hint { display: flex; align-items: center; gap: 5px; }
 .page-note { margin: 23px 0 0; color: var(--muted); font-size: 12.65px; }
@@ -126,7 +130,8 @@ button:disabled { cursor: not-allowed; opacity: .65; }
 .task-load-error .button { cursor: pointer; }
 .task-feedback { margin: 0; padding: 9px 19px; border-top: 1px solid var(--line); background: var(--soft-surface); color: var(--muted); font-size: 12.65px; }
 .task-check { padding: 0; background: var(--surface); cursor: pointer; }
-.task-row--complete .task-check { color: #fff; }
+.task-check--checked { border-color: var(--blue); background: var(--blue); color: #fff; }
+.task-check--checked:not(:disabled):hover { border-color: var(--blue-hover); background: var(--blue-hover); color: #fff; }
 .row-actions .icon-button { cursor: pointer; }
 .row-actions .icon-button:hover, .task-check:not(:disabled):hover { border-color: var(--blue); color: var(--blue); }
 .row-actions .icon-button:disabled, .task-check:disabled { cursor: wait; opacity: .6; }
@@ -246,6 +251,9 @@ button:disabled { cursor: not-allowed; opacity: .65; }
   .task-row > .status-col { grid-column: 1; justify-self: start; margin: 8px 0 0 29px; }
   .task-row > .actions-col { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; margin-top: 5px; }
   .panel-footer { min-height: 36px; padding: 0 12px; }
+  .task-pagination { align-items: flex-start; flex-direction: column; padding: 10px 12px; }
+  .task-pagination > div { width: 100%; justify-content: space-between; }
+  .task-pagination__current { min-width: auto; }
   .task-feedback { padding-inline: 12px; }
   .footer-hint { font-size: 0; }
   .footer-hint svg { width: 14px; height: 14px; }

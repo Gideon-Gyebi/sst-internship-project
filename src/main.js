@@ -48,6 +48,7 @@ const state = {
   tasksLoading: false,
   taskError: '',
   taskFilter: 'all',
+  taskPage: 1,
   taskBusy: false,
   taskBusyMessage: '',
   tasksLoadFailed: false,
@@ -182,7 +183,7 @@ function renderDashboard(user) {
           ${state.authError ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.authError)}</div>` : ''}
           ${state.taskError && !state.taskDialog && !state.tasksLoadFailed ? `<div class="auth-message auth-message--error" role="alert">${escapeHtml(state.taskError)}</div>` : ''}
           <section class="welcome-row"><div><h1>Welcome to your workspace, ${safeName}</h1><p>${dashboardSubtitle}</p></div><button class="button button--primary" type="button" data-action="add-task" ${state.taskBusy || state.tasksLoadFailed ? 'disabled' : ''}>${icon('plus', 16)} Add task</button></section>
-          ${renderTaskDashboard({ tasks: state.tasks, filter: state.taskFilter, loading: state.tasksLoading, loadError: state.tasksLoadFailed, error: state.taskError, busy: state.taskBusy, busyMessage: state.taskBusyMessage, icon, escapeHtml })}
+          ${renderTaskDashboard({ tasks: state.tasks, filter: state.taskFilter, page: state.taskPage, pageSize: 10, loading: state.tasksLoading, loadError: state.tasksLoadFailed, error: state.taskError, busy: state.taskBusy, busyMessage: state.taskBusyMessage, icon, escapeHtml })}
           <p class="page-note">Small steps add up. Focus on one task at a time.</p>
         </main>
       </div>
@@ -308,7 +309,17 @@ function bindDashboardControls() {
 
   document.querySelectorAll('[data-task-filter]').forEach((button) => button.addEventListener('click', () => {
     state.taskFilter = button.dataset.taskFilter;
+    state.taskPage = 1;
     render();
+  }));
+
+  document.querySelectorAll('[data-task-page]').forEach((button) => button.addEventListener('click', () => {
+    const isMovingForward = Number(button.dataset.taskPage) > state.taskPage;
+    state.taskPage = Number(button.dataset.taskPage);
+    render();
+    const pageButton = document.querySelector(`.task-pagination [aria-label="${isMovingForward ? 'Previous' : 'Next'} page"]`);
+    pageButton?.focus({ preventScroll: true });
+    document.querySelector('.task-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
 
   document.querySelectorAll('[data-action="toggle-task"]').forEach((button) => button.addEventListener('click', async () => {
@@ -448,6 +459,7 @@ async function watchCurrentUserTasks(user) {
   state.tasksLoadFailed = false;
   state.taskError = '';
   state.taskFilter = 'all';
+  state.taskPage = 1;
   state.taskDialog = null;
 
   if (!user) return;
