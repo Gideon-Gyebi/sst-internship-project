@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function ownsTasks(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function validTask() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'subject', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['title', 'subject', 'status', 'createdAt', 'updatedAt'])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 160
+        && data.title.matches('.*\\S.*')
+        && data.subject is string
+        && data.subject.size() > 0
+        && data.subject.size() <= 120
+        && data.subject.matches('.*\\S.*')
+        && data.status in ['pending', 'completed']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId}/tasks/{taskId} {
+      allow read: if ownsTasks(userId);
+      allow create: if ownsTasks(userId)
+        && validTask()
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if ownsTasks(userId)
+        && validTask()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if ownsTasks(userId);
+    }
+  }
+}
