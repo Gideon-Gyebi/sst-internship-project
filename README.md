@@ -1,6 +1,13 @@
 # Student Study Tracker (SST)
 
-Vite, vanilla JavaScript, and Firebase foundation for the ATU Virtual Internship mini project.
+**A calmer place to organize coursework, track progress, and keep study tasks moving.**
+
+SST is a responsive study-task tracker built with Vite, vanilla JavaScript, Firebase Authentication, and Cloud Firestore for the ATU Virtual Internship mini project.
+
+<p align="center">
+  <img src="docs/images/sst-dashboard-light.png" alt="SST desktop dashboard design preview showing task counts, course tasks, and completed work" width="100%">
+</p>
+<p align="center"><em>Desktop dashboard preview · Task counts, course filters, pending and completed tasks, and task actions.</em></p>
 
 ## Run locally
 
@@ -20,5 +27,14 @@ The app includes Firebase email/password registration and login, Google sign-in,
 Run `npm run test:rules` to execute the Firestore security tests against the local emulator. This uses a demo project ID and does not connect to production. The emulator requires Java 11 or newer and the Firebase CLI. Use `npm run build` to create the Firebase Hosting files in `dist/`.
 
 See [TESTING.md](TESTING.md) for the latest test results and the owner review checklist before publishing.
+
+## Mobile preview
+
+<p align="center">
+  <img src="docs/images/sst-mobile-dashboard-light.png" alt="SST mobile dashboard design preview showing responsive task cards, progress, and navigation" width="360">
+</p>
+<p align="center"><em>The dashboard adapts to a phone-sized screen while keeping task status and actions visible.</em></p>
+
+These images are design previews from the repository's UI references. The running app may differ slightly as implementation evolves.
 
 In the Firebase Console, enable Email/Password and Google sign-in under Authentication. For local Google sign-in, make sure `localhost` is in Authentication's authorized domains. After reviewing `firestore.rules`, deploy it with `firebase deploy --only firestore:rules --project sstv1-e6dc0`. See [COMMANDS.md](COMMANDS.md) for the command reference.

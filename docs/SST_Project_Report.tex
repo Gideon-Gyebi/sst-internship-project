@@ -43,11 +43,15 @@
   \end{tabular}
 \end{center}
 
+\section*{Project Links}
+\textbf{Live application URL:} \url{https://sstv1-e6dc0.web.app}\\
+\textbf{GitHub repository URL:} \url{https://github.com/Gideon-Gyebi/sst-internship-project}
+
 \section{Project Overview}
 
-The Student Study Tracker (SST) is a web application for organising study tasks by title and subject or course. It addresses a common student problem: coursework and study actions can be spread across notes and reminders, making it difficult to see what remains to be done or which tasks have been completed. SST brings these actions into one authenticated workspace and keeps each student's tasks in cloud storage.
+\textbf{Problem statement.} Students may keep coursework and study actions in separate notes or reminders, making it difficult to see what remains to be done and what has been completed. The project addresses this problem with a simple, secure study-task tracker that organises work by title and course.
 
-The project was developed for the ATU Virtual Internship beginner software development project. Its scope is intentionally focused on task tracking: students can record a task, associate it with a course, update its status, and review progress from a dashboard.
+\textbf{Plan.} Build a responsive dashboard where a student can add tasks with a title and course, edit or delete them, mark them complete, and review progress. Use Firebase Authentication to separate student accounts, Cloud Firestore to store each student's tasks, and Firestore Security Rules to enforce ownership and validate task data. The project was developed for the ATU Virtual Internship beginner software development project.
 
 \section{Implemented Features}
 
@@ -66,43 +70,58 @@ The current application supports the following:
 
 Each task contains a title, subject, status, creation timestamp, and update timestamp. Firestore Security Rules restrict task access to the authenticated owner and validate allowed fields, value types, status values, size limits, and server timestamps. Whitespace-only titles and course names are rejected by the rules.
 
-\section{Deployment and Evidence}
-
-The application is deployed to Firebase Hosting at \url{https://sstv1-e6dc0.web.app}. The Firestore rules and Hosting build were released to the Firebase project for SST on 31 October 2026. The deployed sign-in page was opened successfully after release.
+\section{Feature Screenshot Evidence}
 
 \begin{figure}[htbp]
   \centering
   \fbox{\begin{minipage}[c][4.2cm][c]{0.88\linewidth}
     \centering
-    \textbf{Screenshot placeholder}\\[5pt]
-    Replace this box with a screenshot of the SST dashboard.\\
-    Suggested evidence: dashboard with task counts and the task list.
+    \textbf{Dashboard screenshot placeholder}\\[5pt]
+    Insert a dashboard screenshot showing the core features, including at least one added task and one completed task.
   \end{minipage}}
-  \caption{Student Study Tracker dashboard. Replace the placeholder with a final application screenshot.}
+  \caption{Implemented SST features displayed on the dashboard. Replace the placeholder with a clear application screenshot.}
   \label{fig:sst-dashboard}
 \end{figure}
 
-\section{Testing Summary}
+\section{Deployment and Evidence}
 
-The Firestore rules were tested with the Firebase Emulator Suite and an isolated demo project ID. Seven automated tests passed. They cover unauthenticated access denial, owner access, cross-user read and write denial, valid task operations, whitespace-only values, field limits, invalid or extra fields, and protection of the original creation timestamp. These tests do not write to the production database.
+The Firestore rules and Hosting build were released to the Firebase project for SST on 31 October 2026. The deployed sign-in page was opened successfully after release. Authenticated task operations have not yet been retested against the live deployment.
 
-The production build completed successfully, the dependency audit reported zero known vulnerabilities, and the pagination behaviour was checked in the local browser with more than ten tasks. The first page displayed ten tasks and the next page displayed the remaining task. Earlier owner testing confirmed that task creation, editing, and deletion update Firestore in real time. The live site was verified to load its sign-in page after deployment; authenticated task operations have not yet been retested against the live deployment.
+\section{Testing Checklist}
+
+The Firestore Emulator Suite ran seven automated security-rule tests using an isolated demo project. The production build, dependency audit, pagination, and initial live page load were also checked; authenticated task operations still need a live retest. The checklist records the available results and evidence still to be confirmed.
 
 \begin{center}
 \small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.43\linewidth} X}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.40\linewidth} X}
 \hline
-\textbf{Test} & \textbf{Recorded result} \\
+\textbf{Test} & \textbf{Result / evidence} \\
 \hline
-Firestore access and validation rules & Pass: 7 emulator tests \\
+Firestore access and validation rules & Pass: 7 emulator tests; no production writes \\
 Production build & Pass: Vite generated the Hosting build \\
 Dependency audit & Pass: zero reported vulnerabilities \\
 Pagination & Pass: ten-item page limit observed locally \\
-Live deployment & Pass: deployed sign-in page loaded \\
-Responsive and theme review & \placeholder{Owner to confirm final device/theme checks} \\
+Live deployment & Pass: deployed sign-in page loaded; authenticated operations pending retest \\
+Responsive layout and light/dark themes & \placeholder{Owner to confirm device and theme checks} \\
 \hline
 \end{tabularx}
 \end{center}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\begin{minipage}[c][3.5cm][c]{0.46\linewidth}
+    \centering
+    \textbf{VS Code testing screenshot}\\[5pt]
+    Show the project codebase and test/build results in the terminal.
+  \end{minipage}}\hfill
+  \fbox{\begin{minipage}[c][3.5cm][c]{0.46\linewidth}
+    \centering
+    \textbf{GitHub screenshot}\\[5pt]
+    Show the project repository and relevant verification evidence.
+  \end{minipage}}
+  \caption{Testing and repository evidence. Replace both placeholders with screenshots.}
+  \label{fig:testing-evidence}
+\end{figure}
 
 \section{Development Challenge and Resolution}
 
@@ -116,7 +135,7 @@ A future improvement is a combined search and course filter. Students could sear
 
 \begin{itemize}
   \item Replace the student, programme/course, and final submission date placeholders.
-  \item Insert a clear screenshot of the final dashboard and replace the screenshot frame.
+  \item Replace the dashboard, VS Code, and GitHub screenshot placeholders with clear evidence images.
   \item Confirm the responsive and light/dark theme test row after owner review.
   \item Recheck authenticated task operations on the deployed site if required by the instructor.
   \item Add any required AI-assistance disclosure and source citations under ATU guidance.
