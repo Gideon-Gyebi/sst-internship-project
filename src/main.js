@@ -15,6 +15,7 @@ const icon = (name, size = 18) => {
     book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h8"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
     menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+    close: '<path d="m18 6-12 12M6 6l12 12"/>',
     sprout: '<path d="M12 22v-9m0 4c-5 0-8-3-8-8 5 0 8 3 8 8Zm0-4c0-5 3-8 8-8 0 5-3 8-8 8Z"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -184,12 +185,13 @@ function renderDashboard(user) {
   return `
     <div class="app-shell">
       <aside class="sidebar ${state.mobileMenuOpen ? 'sidebar--open' : ''}" aria-label="Main navigation">
-        <a class="brand" href="#dashboard" aria-label="Student Study Tracker home"><span class="brand-mark">${icon('book', 19)}</span><span class="brand-copy"><strong>SST</strong><small>Student Study Tracker</small></span></a>
+        <div class="sidebar-header"><a class="brand" href="#dashboard" aria-label="Student Study Tracker home"><span class="brand-mark">${icon('book', 19)}</span><span class="brand-copy"><strong>SST</strong><small>Student Study Tracker</small></span></a><button class="icon-button sidebar-close" type="button" aria-label="Close navigation" data-action="close-menu">${icon('close', 18)}</button></div>
         <div class="sidebar-label">Workspace</div>
         <a class="nav-link nav-link--active" href="#dashboard">${icon('grid', 16)}<span>Dashboard</span></a>
         <section class="sidebar-note" aria-label="Study tip"><span class="sidebar-note__icon">${icon('sprout', 17)}</span><strong>A little progress, daily.</strong><p>Make space for what matters. One study task at a time.</p></section>
         <div class="sidebar-bottom"><div class="sidebar-label">Appearance</div>${themeToggle('sidebar-theme')}<button class="signout-button" type="button" data-action="signout" ${state.signOutBusy ? 'disabled' : ''}>${icon('logout', 15)}<span>${state.signOutBusy ? 'Signing out…' : 'Sign out'}</span></button></div>
       </aside>
+      ${state.mobileMenuOpen ? '<button class="mobile-menu-backdrop" type="button" aria-label="Close navigation" data-action="close-menu"></button>' : ''}
       <div class="workspace">
         <header class="topbar"><button class="icon-button mobile-menu" type="button" aria-label="Toggle navigation" aria-expanded="${state.mobileMenuOpen}" data-action="menu">${icon('menu')}</button><div class="breadcrumb">${icon('grid', 15)}<span aria-hidden="true">/</span><span>Dashboard</span></div><div class="profile"><span class="avatar">${escapeHtml(initials)}</span><span>${safeName}</span></div></header>
         <main class="main-content" id="dashboard">
@@ -340,6 +342,11 @@ function bindDashboardControls() {
     state.mobileMenuOpen = !state.mobileMenuOpen;
     render();
   });
+  document.querySelectorAll('[data-action="close-menu"]').forEach((button) => button.addEventListener('click', () => {
+    state.mobileMenuOpen = false;
+    render();
+    document.querySelector('[data-action="menu"]')?.focus();
+  }));
   document.querySelectorAll('[data-action="signout"]').forEach((button) => button.addEventListener('click', async () => {
     state.signOutBusy = true;
     state.authError = '';
